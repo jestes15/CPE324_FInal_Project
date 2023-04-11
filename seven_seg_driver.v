@@ -1,6 +1,6 @@
 module seven_seg_driver(
     input [31:0] time_in_bcd,
-    output [6:0] hex7, hex6, hex5, hex4, hex3, hex2, hex1, hex0
+    output reg [6:0] hex7, hex6, hex5, hex4, hex3, hex2, hex1, hex0
 );
     always @* begin
         case (time_in_bcd[3:0])

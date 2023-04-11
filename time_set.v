@@ -1,11 +1,11 @@
 module time_set(
     input [7:0] time_in,
-    input set_hour, set_minute, set_second, set_mil
+    input set_hour, set_minute, set_second, set_mil,
     output reg [31:0] time_out
 );
 
     always @(posedge set_mil) begin
-        time_out[32:24] = time_in;
+        time_out[31:24] = time_in;
     end
 
     always @(posedge set_hour) begin
