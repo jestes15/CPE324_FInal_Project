@@ -14,7 +14,13 @@ module core (
 	end
 
 	always @(posedge CLOCK_50) begin
+    reg [25:0] base_count = 50000000 / 500000;
+    reg [25:0] count;
 
+    if (count) count = count + 1;
+    else begin
+      
+    end
 	end
 
 	always @(posedge set_alarm or posedge set_time) begin
