@@ -10,4 +10,15 @@ module core (
     time_set TI (.time_in(tine_in), .set_hour(set_hour), .set_minute(set_minute), .set_second(set_second), .set_mil(set_mil), .time_out(time_wire));
     seven_seg_driver SSD (.time_in_bcd(time_wire), .hex0(hex0), .hex1(hex1_wire), .hex2(hex2_wire), .hex3(hex3_wire), .hex4(hex4_wire), .hex5(hex5_wire), .hex6(hex6_wire), .hex7(hex7_wire));
 
-endmodule
+    always @* begin
+      hex7 <= hex7_wire;
+      hex6 <= hex6_wire;
+      hex5 <= hex5_wire;
+      hex4 <= hex4_wire;
+      hex3 <= hex3_wire;
+      hex2 <= hex2_wire;
+      hex1 <= hex1_wire;
+      hex0 <= hex0_wire;
+    end
+
+    endmodule
