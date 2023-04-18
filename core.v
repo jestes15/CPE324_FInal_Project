@@ -1,62 +1,61 @@
-module final (
-	 input CLOCK_50,
-    input [7:0] time_in,
-    input set_hour, set_minute, set_second, set_mil, set_alarm, set_time,
-    output reg [6:0] hex7, hex6, hex5, hex4, hex3, hex2, hex1, hex0,
-	 out
-	 put alarm_sound
+module core (
+	input CLOCK_50,
+	input [7:0] time_in,
+	input set_hour, set_minute, set_second, set_mil, set_alarm, set_time,
+	output reg [6:0] hex7, hex6, hex5, hex4, hex3, hex2, hex1, hex0,
+	output alarm_sound
 );
 
-    reg [31:0] time_out, alarm;
-	 
-	 initial begin
-			time_out = 0;
-			alarm = 0;
-	 end
-	 
-	 always @(posedge CLOCK_50) begin
-	 
-	 end
-	 
-	 always @(posedge set_alarm or posedge set_time) begin
-			if (set_time) begin
-				 if (set_hour) begin
-					  time_out[31:24] = time_in;
-				 end
+	reg [31:0] time_out, alarm;
 
-				 else if (set_minute) begin
-					  time_out[23:16] = time_in;
-				 end
+	initial begin
+		time_out = 0;
+		alarm = 0;
+	end
 
-				 else if (set_second) begin
-					  time_out[15:8] = time_in;
-				 end
+	always @(posedge CLOCK_50) begin
 
-				 else if (set_mil) begin
-					  time_out[7:0] = time_in;
-				 end
+	end
+
+	always @(posedge set_alarm or posedge set_time) begin
+		if (set_time) begin
+			if (set_hour) begin
+				time_out[31:24] = time_in;
 			end
-			else if (set_alarm) begin
-				 if (set_hour) begin
-					  alarm[31:24] = time_in;
-				 end
 
-				 else if (set_minute) begin
-					  alarm[23:16] = time_in;
-				 end
-
-				 else if (set_second) begin
-					  alarm[15:8] = time_in;
-				 end
-
-				 else if (set_mil) begin
-					  alarm[7:0] = time_in;
-				 end
+			else if (set_minute) begin
+				time_out[23:16] = time_in;
 			end
-	 end
-	 
-	 
-	 always @* begin
+
+			else if (set_second) begin
+				time_out[15:8] = time_in;
+			end
+
+			else if (set_mil) begin
+				time_out[7:0] = time_in;
+			end
+		end
+		else if (set_alarm) begin
+			if (set_hour) begin
+				alarm[31:24] = time_in;
+			end
+
+			else if (set_minute) begin
+				alarm[23:16] = time_in;
+			end
+
+			else if (set_second) begin
+				alarm[15:8] = time_in;
+			end
+
+			else if (set_mil) begin
+				alarm[7:0] = time_in;
+			end
+		end
+	end
+
+
+	always @* begin
 		case (time_out[3:0])
 			0  : hex0 = 7'b1000000;
 			1  : hex0 = 7'b1111001;
@@ -70,7 +69,7 @@ module final (
 			9  : hex0 = 7'b0011000;
 			default : hex0 = 7'bx; 
 		endcase
-		case (time_out[7:4])
+			case (time_out[7:4])
 			0  : hex1 = 7'b1000000;
 			1  : hex1 = 7'b1111001;
 			2  : hex1 = 7'b0100100;
@@ -161,6 +160,6 @@ module final (
 			9  : hex7 = 7'b0011000;
 			default : hex7 = 7'bx; 
 		endcase
-    end
-	 
+	end
+
 endmodule
