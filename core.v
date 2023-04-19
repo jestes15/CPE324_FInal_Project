@@ -7,10 +7,15 @@ module core (
 );
 
 	reg [31:0] time_out, alarm;
+  reg [19:0] size_of_file;
+  reg signed [1:-14] wave_out;
+	reg signed [1:-14] two_dimension_array[0:19831];
 
 	initial begin
 		time_out = 0;
 		alarm = 0;
+
+    $readmemh("audio_02_16_signed.txt", two_dimension_array);
 	end
 
 	always @(posedge CLOCK_50) begin
@@ -96,8 +101,33 @@ module core (
 		end
 	end
 
+  always @(posedge CLOCK_50) begin
+    reg play_sound = 0;
+    reg count_down = 0;
+    reg [25:0] scoped_count = 0
+    reg [25:0] base_count = 50000000 / 8000;
+    reg [6:0] index = 0;
 
-	always @* begin
+    if (alarm == time_out) begin 
+      play_sound = 1;
+      scoped_count = 19831;
+    end
+
+    if (play_sound) begin 
+      if (scoped_count) scoped_count = scoped_count - 1;
+      else begin
+        index = index + 1;
+        if (index > 19831) begin
+          play_sound = 0;
+          index = 0;
+        end
+        wave_out = two_dimension_array[index];
+        scoped_count = base_count;
+      end
+    end
+  end
+
+	always @(posedge CLOCK_50) begin
 		case (time_out[3:0])
 			0  : hex0 = 7'b1000000;
 			1  : hex0 = 7'b1111001;
@@ -203,5 +233,29 @@ module core (
 			default : hex7 = 7'bx; 
 		endcase
 	end
+
+  always @ (posedge clk) begin
+    reg signed [3:-28] ge;
+	  pdm(d_bit,wave_out,{2'b00,vol,6'd0},ge);
+	end
+
+  task pdm(
+    output d_out, 
+    input signed [1:-14] x, scale, 
+    inout signed [3:-28] ge
+  );
+    `define ONE_32 {1'b0,3'b001,28'b0} 
+    reg signed [3:-28] x_total; 
+
+    x_total = x * scale;
+    if (x_total >= ge) begin
+      d_out = 1;
+      ge = ge + (`ONE_32 - x_total);
+    end
+    else begin
+      d_out = 0;
+       ge = ge - (`ONE_32 + x_total); 
+    end
+   endtask
 
 endmodule
