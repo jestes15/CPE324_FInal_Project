@@ -19,7 +19,43 @@ module core (
 
     if (count) count = count + 1;
     else begin
-      
+
+      // Milliseconds
+      time_out[3:0] = time_out[3:0] + 1;
+
+      if (time_out[3:0] > 9) begin
+        time_out[3:0] = 0;
+        time_out[7:4] = time_out[7:4] + 1;
+      end
+
+      // Seconds
+      if (time_out[7:4] > 9) begin 
+        time_out[7:4] = 0;
+        time_out[11:8] = time_out[11:8] + 1;
+      end
+      if (time_out[11:8] > 5) begin 
+        time_out[11:8] = 0;
+        time_out[15:12] = time_out[15:12] + 1;
+      end
+
+      // Minutes
+      if (time_out[15:12] > 9) begin 
+        time_out[15:12] = 0;
+        time_out[19:16] = time_out[19:16] + 1;
+      end
+      if (Time_out[19:16] > 5) begin
+				Time_out[19:16] = 0;
+				Time_out[23:20] = Time_out[23:20] + 1;
+      end
+
+      // Hours
+      if (Time_out[27:23] > 9) begin
+				Time_out[27:23] = 0;
+				Time_out[31:28] = Time_out[31:28] + 1;
+			end
+      if (time_out[31:28] == 2 &&  time_out[27:23] == 4) begin
+			  Time_out[31:23] = 0;
+			end
     end
 	end
 
