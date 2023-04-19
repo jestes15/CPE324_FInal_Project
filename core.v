@@ -5,66 +5,21 @@ module core (
 	output reg [6:0] hex7, hex6, hex5, hex4, hex3, hex2, hex1, hex0,
 	output alarm_sound
 );
-
 	reg [31:0] time_out, alarm;
-  reg [19:0] size_of_file;
-  reg signed [1:-14] wave_out;
+  	reg [19:0] size_of_file;
+  	reg signed [1:-14] wave_out;
 	reg signed [1:-14] two_dimension_array[0:19831];
 
 	initial begin
 		time_out = 0;
 		alarm = 0;
-
-    $readmemh("audio_02_16_signed.txt", two_dimension_array);
+		$readmemh("audio_02_16_signed.txt", two_dimension_array);
 	end
 
-	always @(posedge CLOCK_50) begin
-    reg [25:0] base_count = 50000000 / 500000;
-    reg [25:0] count;
-
-    if (count) count = count + 1;
-    else begin
-
-      // Milliseconds
-      time_out[3:0] = time_out[3:0] + 1;
-
-      if (time_out[3:0] > 9) begin
-        time_out[3:0] = 0;
-        time_out[7:4] = time_out[7:4] + 1;
-      end
-
-      // Seconds
-      if (time_out[7:4] > 9) begin 
-        time_out[7:4] = 0;
-        time_out[11:8] = time_out[11:8] + 1;
-      end
-      if (time_out[11:8] > 5) begin 
-        time_out[11:8] = 0;
-        time_out[15:12] = time_out[15:12] + 1;
-      end
-
-      // Minutes
-      if (time_out[15:12] > 9) begin 
-        time_out[15:12] = 0;
-        time_out[19:16] = time_out[19:16] + 1;
-      end
-      if (Time_out[19:16] > 5) begin
-				Time_out[19:16] = 0;
-				Time_out[23:20] = Time_out[23:20] + 1;
-      end
-
-      // Hours
-      if (Time_out[27:23] > 9) begin
-				Time_out[27:23] = 0;
-				Time_out[31:28] = Time_out[31:28] + 1;
-			end
-      if (time_out[31:28] == 2 &&  time_out[27:23] == 4) begin
-			  Time_out[31:23] = 0;
-			end
-    end
-	end
-
-	always @(posedge set_alarm or posedge set_time) begin
+	always @(posedge CLOCK_50 or posedge set_alarm or posedge set_time) begin
+		reg [25:0] base_count = 50000000 / 500000;
+		reg [25:0] count;
+		
 		if (set_time) begin
 			if (set_hour) begin
 				time_out[31:24] = time_in;
@@ -99,33 +54,73 @@ module core (
 				alarm[7:0] = time_in;
 			end
 		end
+		else begin
+			if (count) count = count + 1;
+			else begin
+				// Milliseconds
+				time_out[3:0] = time_out[3:0] + 1;
+				if (time_out[3:0] > 9) begin
+					time_out[3:0] = 0;
+					time_out[7:4] = time_out[7:4] + 1;
+				end
+
+				// Seconds
+				if (time_out[7:4] > 9) begin 
+					time_out[7:4] = 0;
+					time_out[11:8] = time_out[11:8] + 1;
+				end
+				if (time_out[11:8] > 5) begin 
+					time_out[11:8] = 0;
+					time_out[15:12] = time_out[15:12] + 1;
+				end
+
+				// Minutes
+				if (time_out[15:12] > 9) begin 
+					time_out[15:12] = 0;
+					time_out[19:16] = time_out[19:16] + 1;
+				end
+				if (time_out[19:16] > 5) begin
+						time_out[19:16] = 0;
+						time_out[23:20] = time_out[23:20] + 1;
+				end
+
+				// Hours
+				if (time_out[27:23] > 9) begin
+						time_out[27:23] = 0;
+						time_out[31:28] = time_out[31:28] + 1;
+					end
+				if (time_out[31:28] == 2 &&  time_out[27:23] == 4) begin
+						time_out[31:23] = 0;
+				end
+			end
+		end
 	end
 
-  always @(posedge CLOCK_50) begin
-    reg play_sound = 0;
-    reg count_down = 0;
-    reg [25:0] scoped_count = 0
-    reg [25:0] base_count = 50000000 / 8000;
-    reg [6:0] index = 0;
+	always @(posedge CLOCK_50) begin
+		reg play_sound = 0;
+		reg count_down = 0;
+		reg [25:0] scoped_count = 0;
+		reg [25:0] base_count = 50000000 / 8000;
+		reg [6:0] index = 0;
 
-    if (alarm == time_out) begin 
-      play_sound = 1;
-      scoped_count = 19831;
-    end
+		if (alarm == time_out) begin 
+			play_sound = 1;
+			scoped_count = 19831;
+		end
 
-    if (play_sound) begin 
-      if (scoped_count) scoped_count = scoped_count - 1;
-      else begin
-        index = index + 1;
-        if (index > 19831) begin
-          play_sound = 0;
-          index = 0;
-        end
-        wave_out = two_dimension_array[index];
-        scoped_count = base_count;
-      end
-    end
-  end
+		if (play_sound) begin 
+			if (scoped_count) scoped_count = scoped_count - 1;
+			else begin
+				index = index + 1;
+				if (index > 19831) begin
+					play_sound = 0;
+					index = 0;
+				end
+				wave_out = two_dimension_array[index];
+				scoped_count = base_count;
+			end
+		end
+	end
 
 	always @(posedge CLOCK_50) begin
 		case (time_out[3:0])
@@ -234,28 +229,27 @@ module core (
 		endcase
 	end
 
-  always @ (posedge clk) begin
-    reg signed [3:-28] ge;
-	  pdm(d_bit,wave_out,{2'b00,vol,6'd0},ge);
+	always @ (posedge CLOCK_50) begin
+		reg signed [3:-28] ge;
+		pdm(alarm_sound,wave_out,{2'b00,8'b1,6'd0},ge);
 	end
 
-  task pdm(
-    output d_out, 
-    input signed [1:-14] x, scale, 
-    inout signed [3:-28] ge
-  );
-    `define ONE_32 {1'b0,3'b001,28'b0} 
-    reg signed [3:-28] x_total; 
+	task pdm(
+		output d_out, 
+		input signed [1:-14] x, scale, 
+		inout signed [3:-28] ge
+	);
+		`define ONE_32 {1'b0,3'b001,28'b0} 
+		reg signed [3:-28] x_total; 
 
-    x_total = x * scale;
-    if (x_total >= ge) begin
-      d_out = 1;
-      ge = ge + (`ONE_32 - x_total);
-    end
-    else begin
-      d_out = 0;
-       ge = ge - (`ONE_32 + x_total); 
-    end
-   endtask
-
+		x_total = x * scale;
+		if (x_total >= ge) begin
+			d_out = 1;
+			ge = ge + (`ONE_32 - x_total);
+		end
+		else begin
+			d_out = 0;
+			ge = ge - (`ONE_32 + x_total); 
+		end
+	endtask
 endmodule
